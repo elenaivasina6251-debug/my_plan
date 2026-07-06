@@ -47,25 +47,32 @@
       <aside class="statistics-panel" aria-labelledby="weekStatisticsTitle">
         <div class="panel-heading">
           <span class="panel-heading__marker" aria-hidden="true"></span>
-          <h2 id="weekStatisticsTitle">Статистика за неделю</h2>
+          <div>
+            <h2 id="weekStatisticsTitle">Статистика за неделю</h2>
+            <span class="statistics-period" id="weekStatisticsPeriod"></span>
+          </div>
         </div>
 
         <dl class="metrics">
           <div class="metric">
-            <dt>Всего задач</dt>
-            <dd>0</dd>
+            <dt>План</dt>
+            <dd id="weekPlanValue">0</dd>
           </div>
           <div class="metric">
-            <dt>Выполнено</dt>
-            <dd>0</dd>
-          </div>
-          <div class="metric">
-            <dt>В работе</dt>
-            <dd>0</dd>
+            <dt>Факт</dt>
+            <dd id="weekFactValue">0</dd>
           </div>
           <div class="metric metric--accent">
-            <dt>Прогресс</dt>
-            <dd>0%</dd>
+            <dt>Выполнение</dt>
+            <dd id="weekCompletionValue">0%</dd>
+          </div>
+          <div class="metric">
+            <dt>Перенесенные</dt>
+            <dd id="weekTransferredValue">0</dd>
+          </div>
+          <div class="metric">
+            <dt>Отмененные</dt>
+            <dd id="weekCanceledValue">0</dd>
           </div>
         </dl>
       </aside>
@@ -76,7 +83,7 @@
             <span class="section-caption">План на 7 дней</span>
             <h2 id="weekBoardTitle">Неделя</h2>
           </div>
-          <span class="week-board__hint">Перетаскивание задач будет доступно позже</span>
+          <span class="week-board__hint">Перетащите активную задачу на более поздний день</span>
         </div>
 
         <div class="days-grid" id="daysGrid" aria-live="polite"></div>
@@ -85,25 +92,32 @@
       <aside class="statistics-panel" aria-labelledby="monthStatisticsTitle">
         <div class="panel-heading">
           <span class="panel-heading__marker" aria-hidden="true"></span>
-          <h2 id="monthStatisticsTitle">Статистика за месяц</h2>
+          <div>
+            <h2 id="monthStatisticsTitle">Статистика за месяц</h2>
+            <span class="statistics-period" id="monthStatisticsPeriod"></span>
+          </div>
         </div>
 
         <dl class="metrics">
           <div class="metric">
-            <dt>Всего задач</dt>
-            <dd>0</dd>
+            <dt>План</dt>
+            <dd id="monthPlanValue">0</dd>
           </div>
           <div class="metric">
-            <dt>Выполнено</dt>
-            <dd>0</dd>
-          </div>
-          <div class="metric">
-            <dt>Просрочено</dt>
-            <dd>0</dd>
+            <dt>Факт</dt>
+            <dd id="monthFactValue">0</dd>
           </div>
           <div class="metric metric--accent">
-            <dt>Прогресс</dt>
-            <dd>0%</dd>
+            <dt>Выполнение</dt>
+            <dd id="monthCompletionValue">0%</dd>
+          </div>
+          <div class="metric">
+            <dt>Перенесенные</dt>
+            <dd id="monthTransferredValue">0</dd>
+          </div>
+          <div class="metric">
+            <dt>Отмененные</dt>
+            <dd id="monthCanceledValue">0</dd>
           </div>
         </dl>
       </aside>
@@ -114,16 +128,57 @@
         <span class="section-caption">Выгрузка данных</span>
         <h2>Экспорт задач</h2>
       </div>
-      <div class="export-panel__actions">
-        <button class="button button--secondary" type="button" disabled title="Будет доступно на следующем этапе">
-          Экспорт в CSV
-        </button>
-        <button class="button button--secondary" type="button" disabled title="Будет доступно на следующем этапе">
-          Печать / PDF
-        </button>
+      <div class="export-panel__controls">
+        <div class="export-panel__period" role="group" aria-labelledby="exportPeriodLabel">
+          <span id="exportPeriodLabel">Период</span>
+          <label for="exportStartDate">
+            С
+            <input id="exportStartDate" type="date">
+          </label>
+          <label for="exportEndDate">
+            По
+            <input id="exportEndDate" type="date">
+          </label>
+        </div>
+        <div class="export-panel__actions">
+          <button class="button button--secondary" id="exportCsvButton" type="button">
+            Выгрузить в CSV
+          </button>
+          <button class="button button--secondary" id="printPdfButton" type="button">
+            Печать / PDF
+          </button>
+        </div>
+        <p class="export-panel__message" id="exportMessage" role="status" aria-live="polite" hidden></p>
       </div>
     </footer>
   </div>
+
+  <section class="print-report" id="printReport" aria-hidden="true">
+    <header class="print-report__header">
+      <div>
+        <span>Планировщик задач</span>
+        <h1>Отчёт по задачам</h1>
+      </div>
+      <div class="print-report__meta">
+        <strong id="printReportPeriod"></strong>
+        <span id="printReportCreatedAt"></span>
+      </div>
+    </header>
+    <table class="print-report__table">
+      <thead>
+        <tr>
+          <th>Дата</th>
+          <th>Время</th>
+          <th>Задача</th>
+          <th>Описание</th>
+          <th>Приоритет</th>
+          <th>Статус</th>
+          <th>Перенос</th>
+        </tr>
+      </thead>
+      <tbody id="printReportRows"></tbody>
+    </table>
+  </section>
 
   <div class="modal" id="taskModal" hidden>
     <div class="modal__backdrop" data-modal-close></div>
@@ -135,7 +190,7 @@
     >
       <header class="modal__header">
         <div>
-          <span class="section-caption">Новая запись</span>
+          <span class="section-caption" id="taskModalCaption">Новая запись</span>
           <h2 id="taskModalTitle">Добавить задачу</h2>
         </div>
         <button
@@ -200,11 +255,77 @@
           <button class="button button--secondary" id="cancelTaskButton" type="button">
             Отмена
           </button>
-          <button class="button button--primary" type="submit">
+          <button class="button button--primary" id="taskSubmitButton" type="submit">
             Сохранить
           </button>
         </div>
       </form>
+    </section>
+  </div>
+
+  <div class="modal" id="taskDetailsModal" hidden>
+    <div class="modal__backdrop" data-details-close></div>
+    <section
+      class="modal__dialog task-details"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="taskDetailsTitle"
+    >
+      <header class="modal__header">
+        <div>
+          <span class="section-caption">Карточка задачи</span>
+          <h2 id="taskDetailsTitle"></h2>
+        </div>
+        <button
+          class="modal__close"
+          id="taskDetailsCloseButton"
+          type="button"
+          aria-label="Закрыть задачу"
+        >
+          ×
+        </button>
+      </header>
+
+      <div class="task-details__body">
+        <p class="task-details__description" id="taskDetailsDescription"></p>
+
+        <dl class="task-details__meta">
+          <div>
+            <dt>Дата</dt>
+            <dd id="taskDetailsDate"></dd>
+          </div>
+          <div>
+            <dt>Время</dt>
+            <dd id="taskDetailsTime"></dd>
+          </div>
+          <div>
+            <dt>Приоритет</dt>
+            <dd id="taskDetailsPriority"></dd>
+          </div>
+          <div>
+            <dt>Статус</dt>
+            <dd id="taskDetailsStatus"></dd>
+          </div>
+        </dl>
+
+        <span class="task-details__badge" id="taskDetailsTransferredBadge" hidden>
+          Перенесена
+        </span>
+
+        <div class="task-details__actions" id="taskDetailsActions"></div>
+
+        <div class="task-details__transfer" id="taskDetailsTransferControls" hidden>
+          <label for="taskDetailsTransferDate">Новая дата</label>
+          <input id="taskDetailsTransferDate" type="date">
+          <button
+            class="button button--secondary"
+            id="taskDetailsTransferCancelButton"
+            type="button"
+          >
+            Скрыть
+          </button>
+        </div>
+      </div>
     </section>
   </div>
 </body>
